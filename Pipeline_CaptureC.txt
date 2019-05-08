@@ -1,1 +1,26 @@
 Requirement:
+1 Capture-C sequencing data: R1.fastq.gz  R2.fastq.gz
+2 Download captureC from github (https://github.com/Hughes-Genome-Group/captureC/releases), including CCanalyser3.pl, dpnII2E.pl, dpngenome3_1.pl
+3 module load bowtie/1.0.0
+  module load ucsc/081115
+  module load flash/1.2.11
+
+Step1: digest the genome
+Perl dpngenome3.pl PathToHg19Fasta #generate genome_dpnII_coordinates.txt
+
+Step2: run flash 
+flash --interleaved-output -M 135 R1.fastq.gz R2.fastq.gz
+cat out.notCombined.fastq out.extendedFrags.fastq > Combined_reads.fastq
+
+Step3: digest
+dpnII2E.pl Combined_reads.fastq #generate Combined_reads_REdig.fastq
+
+Step4: align reads to hg19
+bowtie -p 1 -m 2 --best --strata --sam --chunkmb 256 PathToHg19BowtieIndex Combined_reads_REdig.fastq Combined_reads_REdig.sam
+
+Step5: generate oligonucleotide-coordinate file 
+more Oligonucleotide_frag_withSNV_extend500.txt
+Frag	14	106328340	106329082	14	106327840	106329582	106328827	A
+
+Step6: run CCanalyser2.pl
+perl CCanalyser3.pl -b PathToHg19Fasta --genome hg19 -f Combined_reads_REdig.sam -r genome_dpnII_coordinates.txt -o Oligonucleotide_frag_withSNV_extend500.txt -s Nalm6_IGHM_enhancer_extend500 --pf publicoutput_ extend500
