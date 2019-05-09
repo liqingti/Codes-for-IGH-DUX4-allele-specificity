@@ -5,6 +5,8 @@ Requirement:
   module load ucsc/081115
   module load flash/1.2.11
 
+The pipeline is based on the instruction of captureC.
+
 Step1: digest the genome
 Perl dpngenome3.pl PathToHg19Fasta #generate genome_dpnII_coordinates.txt
 
